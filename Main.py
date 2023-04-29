@@ -36,4 +36,4 @@ async def chat(ctx, *, message):
     response = await get_gpt_response(prompt)
     await ctx.send(f"{bot.user.name}: {response}")
 
-bot.run("MTEwMTY2NTkzMTU2ODEwMzQ0Ng.GC8C-6.PMfh7Jt5Ze3D5SIoclQI18nMn3tqj_4_cZH9pI")
+bot.run("")
