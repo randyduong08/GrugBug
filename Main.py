@@ -36,4 +36,6 @@ async def chat(ctx, *, message):
     response = await get_gpt_response(prompt)
     await ctx.send(f"{bot.user.name}: {response}")
 
-bot.run("")
+
+discord_bot_key = os.environ.get('DISCORD_BOT_KEY')
+bot.run(discord_bot_key)
