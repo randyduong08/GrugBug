@@ -3,6 +3,13 @@ import openai
 import discord
 from discord.ext import commands
 from discord import Intents
+from pytesseract import pytesseract
+from typing import Tuple, Union
+from PIL import Image
+
+#Set path to where your tesseract.exe is located
+path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.tesseract_cmd = path_to_tesseract
 
 # Get OPEN_API_KEY from window environment variable
 openai.api_key = os.environ.get('OPENAI_API_KEY')
@@ -65,14 +72,57 @@ async def on_message(message):
     # Otherwise, process commands in received message
     # Check if bot is mentioned in the message
     if bot.user in message.mentions:
-        # Remove bot mention from message content, strip leading/trailing whitespace
-        cleaned_message = message.content.replace(f'<@!{bot.user.id}>', '').strip()
-        # Call chat function, with context and cleaned_message
-        ctx = await bot.get_context(message)
-        await chat(ctx, message=cleaned_message)
+        # Process if the message contains an image attachment by calling other func
+        contains_image, img = await capture_image(message)
+        if contains_image:
+            print("image done, do OCR here")
+            text = ocr_image(img)
+            print(text)
+            return
+        else:
+            # Remove bot mention from message content, strip leading/trailing whitespace
+            cleaned_message = message.content.replace(f'<@!{bot.user.id}>', '').strip()
+            # Call chat function, with context and cleaned_message
+            ctx = await bot.get_context(message)
+            await chat(ctx, message=cleaned_message)
     else:
         # Otherwise, process commands in received message
         await bot.process_commands(message)
+
+
+"""
+Function that performs OCR on image, grabbing all text from it as possible
+:param image: the image to perform OCR on, and extract text out of
+:return: a string that holds all the text grabbed from the image
+"""
+def ocr_image(image) -> str:
+    text = pytesseract.image_to_string(image)
+    text = text.lower()
+    return text
+
+
+"""
+Function that processes if a message contains an image attachment
+:param message: represents the message that is to be processed, to see if it contains an image attachment
+:return: A boolean that is True if image has been processed, for False otherwise, and an image/None
+"""
+async def capture_image(message) -> Tuple[bool, Union[Image.Image, None]]:
+    # Check if message has attachment
+    if message.attachments:
+        for attachment in message.attachments:
+            # Check if attachment is img (jpg / png)
+            if attachment.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+                # Save image locally
+                save_directory = 'Images'
+                # exist_ok=True means that function won't raise error if directory already exists
+                os.makedirs(save_directory, exist_ok=True)
+                image_path = os.path.join(save_directory, attachment.filename)
+                await attachment.save(image_path)
+                await message.channel.send(f"Image saved as {attachment.filename}")
+                # Open image using PIL (so can return an img)
+                img = Image.open(image_path)
+                return True, img
+    return False, None
 
 
 """
