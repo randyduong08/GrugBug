@@ -58,24 +58,39 @@ Async function that runs when a message is received (with command_prefix), proce
 """
 @bot.event
 async def on_message(message):
-    # If message is from bot itself, simply returns (dont need to process)
+    # If message is from bot itself, simply returns (don't need to process)
     if message.author == bot.user:
         return
+
     # Otherwise, process commands in received message
-    await bot.process_commands(message)
+    # Check if bot is mentioned in the message
+    if bot.user in message.mentions:
+        # Remove bot mention from message content, strip leading/trailing whitespace
+        cleaned_message = message.content.replace(f'<@!{bot.user.id}>', '').strip()
+        # Call chat function, with context and cleaned_message
+        ctx = await bot.get_context(message)
+        await chat(ctx, message=cleaned_message)
+    else:
+        # Otherwise, process commands in received message
+        await bot.process_commands(message)
 
 
 """
 Async command function that interacts with GPT AI
+:param ctx: abbreviation for context, an instance of 'commands.Context', provides context around the function call,
+            such as ctx.author (user who invoked command), ctx.channel (channel where command was invoked), etc.
+:param *: specifies that arguments after the '*' (i.e., 'message') are passed as keyword arguments, not positional
+:param message: captures remaining content of command as a string
 """
-@bot.command(name="chat", help="Chat with the BatGPT AI")
+# Decorator that registers 'chat' as aa command in discord bot, and 'help' parameter give users explanation of the bot
+@bot.command(name="GrugBug", help="Chat with the BatGPT AI")
 async def chat(ctx, *, message):
     # Create prompt using message content and author's name
     prompt = f"{ctx.author.name}: {message}"
     # calls GPT response using other func, assigns return value to 'response'
     response = await get_gpt_response(prompt)
     # Send the response as a message in the chat
-    await ctx.send(f"{bot.user.name}: {response}")
+    await ctx.send(f"{ctx.author.mention}, {response}")
 
 
 """
