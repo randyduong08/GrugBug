@@ -65,14 +65,42 @@ async def on_message(message):
     # Otherwise, process commands in received message
     # Check if bot is mentioned in the message
     if bot.user in message.mentions:
-        # Remove bot mention from message content, strip leading/trailing whitespace
-        cleaned_message = message.content.replace(f'<@!{bot.user.id}>', '').strip()
-        # Call chat function, with context and cleaned_message
-        ctx = await bot.get_context(message)
-        await chat(ctx, message=cleaned_message)
+        # Process if the message contains an image attachment by calling other func
+        contains_image = await process_image(message)
+        if contains_image:
+            print("image done, do OCR here")
+            return
+        else:
+            # Remove bot mention from message content, strip leading/trailing whitespace
+            cleaned_message = message.content.replace(f'<@!{bot.user.id}>', '').strip()
+            # Call chat function, with context and cleaned_message
+            ctx = await bot.get_context(message)
+            await chat(ctx, message=cleaned_message)
     else:
         # Otherwise, process commands in received message
         await bot.process_commands(message)
+
+
+"""
+Function that processes if a message contains an image attachment
+:param message: represents the message that is to be processed, to see if it contains an image attachment
+:return: A boolean that is True if image has been processed, for False otherwise
+"""
+async def process_image(message) -> bool:
+    # Check if message has attachment
+    if message.attachments:
+        for attachment in message.attachments:
+            # Check if attachment is img (jpg / png)
+            if attachment.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+                # Save image locally
+                save_directory = 'Images'
+                # exist_ok=True means that function won't raise error if directory already exists
+                os.makedirs(save_directory, exist_ok=True)
+                image_path = os.path.join(save_directory, attachment.filename)
+                await attachment.save(image_path)
+                await message.channel.send(f"Image saved as {attachment.filename}")
+                return True
+    return False
 
 
 """
