@@ -7,7 +7,6 @@ from pytesseract import pytesseract
 path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 pytesseract.tesseract_cmd = path_to_tesseract
 
-
 """
 Function that performs OCR on image, grabbing all text from it as possible
 :param image: the image to perform OCR on, and extract text out of
