@@ -1,6 +1,5 @@
 import os
 import openai
-import discord
 from discord.ext import commands
 from discord import Intents
 from pytesseract import pytesseract
