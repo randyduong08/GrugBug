@@ -48,8 +48,7 @@ class DiscordBot:
             contains_image, img = await capture_image(message)
             if contains_image:
                 print("image done, do OCR here")
-                text = ocr_image(img)
-                print(text)
+                await self.handle_img_message(message, img)
                 return
             else:
                 # Remove bot mention from message content, strip leading/trailing whitespace
@@ -60,6 +59,22 @@ class DiscordBot:
         else:
             # Otherwise, process commands in received message
             await self.bot.process_commands(message)
+
+    """
+    function that handles bot interaction in discord if user sent an image message
+    :param message: the original message that the user in discord sent to the bot
+    :param image: the image that was inside the message that the user sent in discord
+    """
+    @staticmethod
+    async def handle_img_message(message, image):
+        # Do more stuff in this func, with chatgpt solving the translated text
+        # Calls ocr_image func to extract text from image, and assign to 'text'
+        text = ocr_image(image)
+        await message.channel.send(f"Converted text: {text}")
+        prompt = "Can you solve this math question? "
+        prompt += text
+        response = await get_gpt_response(prompt)
+        await message.channel.send(response)
 
     """
     Async command function that interacts with GPT AI

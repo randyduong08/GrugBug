@@ -14,7 +14,6 @@ Function that performs OCR on image, grabbing all text from it as possible
 """
 def ocr_image(image) -> str:
     text = pytesseract.image_to_string(image)
-    text = text.lower()
     return text
 
 

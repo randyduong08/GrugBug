@@ -12,7 +12,7 @@ Function that receives a prompt from user, feeds the prompt into a GPT model, an
 async def get_gpt_response(prompt):
     # List of messages, first element is system message, second element is user message
     messages = [
-        {"role": "system", "content": "Talking to GrugBug, powered by BatGPT"},
+        {"role": "system", "content": "Talking to GrugBug, an AI-Powered math assistant"},
         {"role": "user", "content": prompt}
     ]
     # Call OpenAI API with provided prompt 'prompt', using 3.5 model
